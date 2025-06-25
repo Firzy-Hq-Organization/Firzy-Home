@@ -24,7 +24,7 @@ const routes = {
   '/contact': `
     <div class="card">
       <h2>Contact</h2>
-      <p>Have questions? Email <a href="mailto:firzy.hq@gmail.com">firzy.hq@gmail.com</a></p>
+      <p>Email: <a href="mailto:firzy.hq@gmail.com">firzy.hq@gmail.com</a></p>
     </div>
   `
 };
@@ -51,7 +51,7 @@ document.addEventListener('DOMContentLoaded', () => {
   router();
   document.body.addEventListener('click', navigate);
 
-  // INTRO ANIMATION
+  // Typewriter Hello Animation
   const greetings = [
     { t: 'Hello', f: 'Roboto' },
     { t: 'Hola', f: 'Amatic SC' },
@@ -65,27 +65,34 @@ document.addEventListener('DOMContentLoaded', () => {
     { t: 'Привет', f: 'Lobster' }
   ];
 
+  const helloEl = document.getElementById('hello-text');
   const overlay = document.getElementById('intro-overlay');
-  const hello = document.getElementById('hello-text');
+
   let i = 0;
 
-  function cycleHello() {
+  function typeGreeting() {
     const { t, f } = greetings[i];
-    hello.classList.remove('show');
-    setTimeout(() => {
-      hello.textContent = t;
-      hello.style.fontFamily = `'${f}', sans-serif`;
-      hello.classList.add('show');
-      i = (i + 1) % greetings.length;
-    }, 200);
+    helloEl.style.fontFamily = `'${f}', sans-serif`;
+    helloEl.textContent = '';
+    helloEl.style.width = t.length + 'ch';
+
+    let charIndex = 0;
+    function typeChar() {
+      if (charIndex < t.length) {
+        helloEl.textContent += t[charIndex++];
+        setTimeout(typeChar, 50);
+      }
+    }
+
+    typeChar();
+    i = (i + 1) % greetings.length;
   }
 
-  cycleHello();
-  const interval = setInterval(cycleHello, 1200); // faster speed
+  typeGreeting();
+  const interval = setInterval(typeGreeting, 800);
 
-  // End after all greetings
   setTimeout(() => {
     clearInterval(interval);
     overlay.classList.add('hidden');
-  }, greetings.length * 1200 + 500);
+  }, greetings.length * 800 + 800);
 });
