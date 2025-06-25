@@ -1,3 +1,5 @@
+window.alert('Welcome To Firzy');
+
 const routes = {
   '/': `
     <div class="card">
