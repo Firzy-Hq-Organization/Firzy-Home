@@ -2,23 +2,19 @@ const routes = {
   '/': `
     <div class="card">
       <h2>Welcome to Firzy</h2>
-      <p>This is Firzy — a youth-led creative tech project. Smart ideas, simple design, and bold moves.</p>
+      <p>Firzy is a young, honest tech vision. Real, raw, and ready to grow.</p>
     </div>
   `,
   '/about': `
     <div class="card">
       <h2>About Firzy</h2>
-      <p>Started by a 12-year-old with a passion for design and freedom. Firzy isn’t a company, it’s a creative rebellion.</p>
+      <p>Created by Fariz — 12, fearless, and future-minded. This isn’t about startups. It’s about voice, design, and pushing boundaries.</p>
     </div>
   `,
   '/projects': `
     <div class="card">
       <h2>Projects</h2>
-      <ul>
-        <li>🛠️ Password Generator</li>
-        <li>🎨 Color Picker</li>
-        <li>📁 Firzy Tools (coming soon)</li>
-      </ul>
+      <p>Still cooking. No public projects yet.</p>
     </div>
   `,
   '/contact': `
@@ -30,7 +26,12 @@ const routes = {
 };
 
 function router(path = location.pathname) {
-  document.getElementById('app').innerHTML = routes[path] || '<div class="card"><h2>404</h2><p>Page not found.</p></div>';
+  const app = document.getElementById('app');
+  app.style.animation = 'none';
+  void app.offsetWidth;
+  app.style.animation = '';
+  app.innerHTML = routes[path] || '<div class="card"><h2>404</h2><p>Page not found.</p></div>';
+
   document.querySelectorAll('nav a[data-link]').forEach(a => {
     a.classList.toggle('active', a.getAttribute('href') === path);
   });
@@ -40,9 +41,8 @@ function navigate(e) {
   const link = e.target.closest('[data-link]');
   if (!link) return;
   e.preventDefault();
-  const to = link.getAttribute('href');
-  history.pushState({}, '', to);
-  router(to);
+  history.pushState({}, '', link.getAttribute('href'));
+  router(link.getAttribute('href'));
 }
 
 window.addEventListener('popstate', () => router());
@@ -51,7 +51,7 @@ document.addEventListener('DOMContentLoaded', () => {
   router();
   document.body.addEventListener('click', navigate);
 
-  // Typewriter Hello Animation
+  // Hello Intro
   const greetings = [
     { t: 'Hello', f: 'Roboto' },
     { t: 'Hola', f: 'Amatic SC' },
@@ -65,34 +65,63 @@ document.addEventListener('DOMContentLoaded', () => {
     { t: 'Привет', f: 'Lobster' }
   ];
 
-  const helloEl = document.getElementById('hello-text');
+  const hello = document.getElementById('hello-text');
   const overlay = document.getElementById('intro-overlay');
 
   let i = 0;
 
-  function typeGreeting() {
-    const { t, f } = greetings[i];
-    helloEl.style.fontFamily = `'${f}', sans-serif`;
-    helloEl.textContent = '';
-    helloEl.style.width = t.length + 'ch';
-
-    let charIndex = 0;
-    function typeChar() {
-      if (charIndex < t.length) {
-        helloEl.textContent += t[charIndex++];
-        setTimeout(typeChar, 50);
+  function type(text, font, done) {
+    hello.style.fontFamily = `'${font}', sans-serif`;
+    hello.textContent = '';
+    let j = 0;
+    const interval = setInterval(() => {
+      hello.textContent = text.slice(0, j++);
+      if (j > text.length) {
+        clearInterval(interval);
+        setTimeout(done, 200);
       }
-    }
-
-    typeChar();
-    i = (i + 1) % greetings.length;
+    }, 50);
   }
 
-  typeGreeting();
-  const interval = setInterval(typeGreeting, 800);
+  function playNext() {
+    if (i >= greetings.length) {
+      overlay.classList.add('hidden');
+    } else {
+      const { t, f } = greetings[i++];
+      type(t, f, playNext);
+    }
+  }
 
-  setTimeout(() => {
-    clearInterval(interval);
-    overlay.classList.add('hidden');
-  }, greetings.length * 800 + 800);
+  playNext();
+
+  // Ambient Canvas
+  const canvas = document.getElementById('ambient');
+  const ctx = canvas.getContext('2d');
+  canvas.width = innerWidth;
+  canvas.height = innerHeight;
+
+  let particles = Array.from({ length: 60 }, () => ({
+    x: Math.random() * canvas.width,
+    y: Math.random() * canvas.height,
+    r: Math.random() * 2 + 1,
+    dx: (Math.random() - 0.5) * 0.4,
+    dy: (Math.random() - 0.5) * 0.4
+  }));
+
+  function animate() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    particles.forEach(p => {
+      ctx.beginPath();
+      ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+      ctx.fillStyle = 'rgba(0,255,255,0.2)';
+      ctx.fill();
+      p.x += p.dx;
+      p.y += p.dy;
+      if (p.x < 0 || p.x > canvas.width) p.dx *= -1;
+      if (p.y < 0 || p.y > canvas.height) p.dy *= -1;
+    });
+    requestAnimationFrame(animate);
+  }
+
+  animate();
 });
